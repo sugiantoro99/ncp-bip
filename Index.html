@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rekap Temuan NCP BIP</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<style>
+  :root {
+    --ios-bg: #F2F2F7;
+    --ios-card-bg: rgba(255, 255, 255, 0.85);
+    --ios-text: #000000;
+    --ios-subtext: #8E8E93;
+    --ios-blue: #007AFF;
+    --ios-green: #34C759;
+    --ios-red: #FF3B30;
+    --ios-gray-btn: #E5E5EA;
+    --ios-border: rgba(60, 60, 67, 0.12);
+    --ios-radius: 16px;
+    --ios-radius-sm: 10px;
+    --ios-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+
+  * { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body { 
+    background-color: var(--ios-bg); 
+    color: var(--ios-text); 
+    padding-bottom: 40px;
+    background-image: radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.08) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, rgba(52, 199, 89, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  .header { 
+    background: rgba(249, 249, 249, 0.78);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: var(--ios-text); 
+    padding: 18px 16px; 
+    text-align: center; 
+    font-size: 17px; 
+    font-weight: 600; 
+    letter-spacing: -0.4px;
+    position: sticky; 
+    top: 0; 
+    z-index: 100; 
+    border-bottom: 0.5px solid var(--ios-border);
+  }
+
+  .container { 
+    padding: 16px; 
+    max-width: 500px; 
+    margin: 0 auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 16px; 
+  }
+
+  .card { 
+    background: var(--ios-card-bg); 
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--ios-radius); 
+    padding: 18px; 
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: var(--ios-shadow);
+  }
+
+  .card-title { 
+    font-size: 13px; 
+    font-weight: 600; 
+    color: var(--ios-subtext); 
+    margin-bottom: 14px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.2px; 
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group:last-child { margin-bottom: 0; }
+
+  .form-group label { 
+    display: block; 
+    font-size: 13px; 
+    font-weight: 500; 
+    color: var(--ios-text); 
+    margin-bottom: 6px; 
+    margin-left: 2px;
+  }
+
+  .form-control { 
+    width: 100%; 
+    padding: 12px 14px; 
+    border: 1px solid var(--ios-border); 
+    border-radius: var(--ios-radius-sm); 
+    font-size: 15px; 
+    outline: none; 
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--ios-text);
+    transition: all 0.2s ease;
+  }
+
+  .form-control:focus { 
+    border-color: var(--ios-blue); 
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+  }
+
+  .btn-primary { 
+    background: var(--ios-blue); 
+    color: #fff; 
+    border: none; 
+    padding: 14px; 
+    border-radius: var(--ios-radius); 
+    font-size: 16px; 
+    font-weight: 600; 
+    width: 100%; 
+    cursor: pointer; 
+    transition: opacity 0.2s, transform 0.1s;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
+  }
+
+  .btn-primary:active { opacity: 0.8; transform: scale(0.98); }
+
+  .btn-scan { 
+    background: var(--ios-gray-btn); 
+    color: var(--ios-blue); 
+    border: none; 
+    padding: 12px; 
+    border-radius: var(--ios-radius-sm); 
+    font-weight: 600; 
+    font-size: 14px;
+    cursor: pointer; 
+    width: 100%; 
+    margin-top: 8px; 
+  }
+
+  .btn-stop { 
+    background: rgba(255, 59, 48, 0.1); 
+    color: var(--ios-red); 
+    border: none; 
+    padding: 10px; 
+    border-radius: var(--ios-radius-sm); 
+    font-weight: 600; 
+    cursor: pointer; 
+    width: 100%; 
+    margin-top: 8px; 
+    display: none; 
+  }
+
+  .status-group { 
+    display: flex; 
+    background: #E3E3E8;
+    padding: 3px;
+    border-radius: 12px;
+    gap: 2px;
+  }
+
+  .btn-status { 
+    flex: 1; 
+    padding: 10px; 
+    border: none; 
+    background: transparent; 
+    border-radius: 9px; 
+    font-weight: 600; 
+    font-size: 15px; 
+    color: var(--ios-text);
+    cursor: pointer; 
+    text-align: center; 
+    transition: all 0.2s;
+  }
+
+  .btn-status.ok.selected { 
+    background: var(--ios-green); 
+    color: #fff; 
+    box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+  }
+
+  .btn-status.ng.selected { 
+    background: var(--ios-red); 
+    color: #fff; 
+    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
+  }
+
+  .panel-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px; 
+  }
+
+  .panel-box { 
+    background: rgba(255, 255, 255, 0.6); 
+    border: 1px dashed var(--ios-border); 
+    border-radius: 12px; 
+    padding: 6px; 
+    text-align: center; 
+    position: relative; 
+    height: 105px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    overflow: hidden;
+  }
+
+  .panel-box span { 
+    font-size: 10px; 
+    font-weight: 600; 
+    color: var(--ios-subtext); 
+    margin-bottom: 6px; 
+  }
+
+  .panel-box input[type="file"] { display: none; }
+
+  .panel-box img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    border-radius: 10px; 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    display: none; 
+  }
+
+  .btn-upload { 
+    background: var(--ios-blue); 
+    color: #fff; 
+    border: none; 
+    font-size: 10px; 
+    font-weight: 600;
+    padding: 6px 10px; 
+    border-radius: 20px; 
+    cursor: pointer; 
+  }
+
+  #reader { 
+    width: 100%; 
+    margin-top: 10px; 
+    border-radius: var(--ios-radius-sm); 
+    overflow: hidden; 
+    display: none; 
+    background: #000; 
+  }
+
+  #mainApp { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">Rekap Temuan NCP BIP</div>
+
+<!-- HALAMAN MASUK (NAMA & BAGIAN) -->
+<div class="container" id="loginPage">
+  <div class="card" style="margin-top: 30px;">
+    <div class="card-title" style="text-align: center;">IDENTITAS INSPECTOR</div>
+    <div class="form-group">
+      <label>Nama Lengkap</label>
+      <input type="text" id="loginUser" class="form-control" placeholder="Contoh: Wahyu Sugiantoro">
+    </div>
+    <div class="form-group">
+      <label>Bagian / Departemen</label>
+      <input type="text" id="loginDept" class="form-control" placeholder="Contoh: IQC / Quality Control">
+    </div>
+    <button class="btn-primary" style="margin-top: 10px;" onclick="doLogin()">Masuk Aplikasi</button>
+  </div>
+</div>
+
+<!-- HALAMAN UTAMA FORM -->
+<div class="container" id="mainApp">
+  
+  <div class="card">
+    <div class="card-title">1. Identitas Unit Mobil</div>
+    
+    <div class="form-group">
+      <label>Nomor NCP (Auto):</label>
+      <input type="text" id="refNo" class="form-control" readonly style="background: rgba(0,0,0,0.03); font-weight: 600;">
+    </div>
+
+    <div class="form-group">
+      <label>VIN Mobil (Scan Barcode/QR):</label>
+      <input type="text" id="vinNo" class="form-control" placeholder="Scan atau ketik VIN...">
+      <button class="btn-scan" id="btnStartScan" onclick="startScanner()">📷 Scan VIN Mobil</button>
+      <button class="btn-stop" id="btnStopScan" onclick="stopScanner()">❌ Matikan Kamera</button>
+      <div id="reader"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Nomor Batch Assembly:</label>
+      <input type="text" id="batchNo" class="form-control" placeholder="Contoh: BATCH-01A">
+    </div>
+
+    <div class="form-group">
+      <label>Inspector / Reporter:</label>
+      <input type="text" id="inspector" class="form-control" readonly style="background: rgba(0,0,0,0.03); font-weight: 600;">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">2. Status Kualitas Unit</div>
+    <div class="status-group">
+      <button class="btn-status ok" id="btnOK" onclick="setStatus('OK')">OK</button>
+      <button class="btn-status ng" id="btnNG" onclick="setStatus('NG')">NG</button>
+    </div>
+
+    <div class="form-group" id="ngContainer" style="display:none; margin-top:14px;">
+      <label style="color: var(--ios-red);">Detail Temuan Defect / NG:</label>
+      <textarea id="ngDetail" class="form-control" rows="3" placeholder="Jelaskan detail temuan NG..."></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">3. Foto 9 Panel Mobil</div>
+    <div class="panel-grid">
+      <script>
+        const panels = [
+          "Kap Mesin", "Bumper Dp", "Fender Ki", 
+          "Fender Ka", "Pintu Dp Ki", "Pintu Dp Ka", 
+          "Atap Mobil", "Bagasi", "Bumper Blk"
+        ];
+        
+        panels.forEach((p, idx) => {
+          document.write(`
+            <div class="panel-box" id="box_${idx}">
+              <span>${p}</span>
+              <button class="btn-upload" onclick="triggerCamera(${idx})">Foto</button>
+              <input type="file" id="file_${idx}" accept="image/*" capture="environment" onchange="previewImage(${idx})">
+              <img id="img_${idx}" onclick="triggerCamera(${idx})">
+            </div>
+          `);
+        });
+      </script>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="submitData()">Simpan Data NCP</button>
+
+</div>
+
+<script>
+  let currentStatus = 'OK';
+  let html5QrcodeScanner = null;
+  let base64Photos = new Array(9).fill("no_photo");
+
+  function doLogin() {
+    const name = document.getElementById('loginUser').value.trim();
+    const dept = document.getElementById('loginDept').value.trim();
+
+    if (!name || !dept) {
+      alert("Harap isi Nama Lengkap dan Bagian/Departemen!");
+      return;
+    }
+
+    // Format tampilan Inspector, contoh: Wahyu (IQC)
+    const inspectorInfo = `${name} (${dept})`;
+    
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    document.getElementById('inspector').value = inspectorInfo;
+    generateNCP();
+  }
+
+  function generateNCP() {
+    const d = new Date();
+    const yy = String(d.getFullYear()).slice(-2);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const rand1 = Math.floor(100 + Math.random() * 900);
+    const rand2 = Math.floor(100 + Math.random() * 900);
+    document.getElementById('refNo').value = `NCP-BIP-${yy}${mm}${dd}-${rand1}-${rand2}`;
+  }
+
+  function setStatus(status) {
+    currentStatus = status;
+    document.getElementById('btnOK').classList.remove('selected');
+    document.getElementById('btnNG').classList.remove('selected');
+    
+    if (status === 'OK') {
+      document.getElementById('btnOK').classList.add('selected');
+      document.getElementById('ngContainer').style.display = 'none';
+    } else {
+      document.getElementById('btnNG').classList.add('selected');
+      document.getElementById('ngContainer').style.display = 'block';
+    }
+  }
+  setStatus('OK');
+
+  function startScanner() {
+    document.getElementById('reader').style.display = 'block';
+    document.getElementById('btnStartScan').style.display = 'none';
+    document.getElementById('btnStopScan').style.display = 'block';
+
+    if (!html5QrcodeScanner) {
+      html5QrcodeScanner = new Html5Qrcode("reader");
+    }
+
+    const config = { fps: 10, qrbox: { width: 240, height: 140 } };
+    
+    html5QrcodeScanner.start(
+      { facingMode: "environment" }, 
+      config,
+      (decodedText) => {
+        document.getElementById('vinNo').value = decodedText;
+        stopScanner();
+      },
+      (errorMessage) => {}
+    ).catch(err => {
+      alert("Gagal membuka kamera. Pastikan izin kamera sudah diberikan di browser.");
+      stopScanner();
+    });
+  }
+
+  function stopScanner() {
+    if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
+      html5QrcodeScanner.stop().then(() => {
+        document.getElementById('reader').style.display = 'none';
+        document.getElementById('btnStartScan').style.display = 'block';
+        document.getElementById('btnStopScan').style.display = 'none';
+      }).catch(err => console.log(err));
+    } else {
+      document.getElementById('reader').style.display = 'none';
+      document.getElementById('btnStartScan').style.display = 'block';
+      document.getElementById('btnStopScan').style.display = 'none';
+    }
+  }
+
+  function triggerCamera(index) {
+    document.getElementById(`file_${index}`).click();
+  }
+
+  function previewImage(index) {
+    const file = document.getElementById(`file_${index}`).files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById(`img_${index}`).src = e.target.result;
+        document.getElementById(`img_${index}`).style.display = 'block';
+        base64Photos[index] = e.target.result;
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function submitData() {
+    const vin = document.getElementById('vinNo').value.trim();
+    if (!vin) {
+      alert("Harap Scan atau Masukkan VIN Mobil terlebih dahulu!");
+      return;
+    }
+
+    const payload = {
+      action: "save",
+      ref: document.getElementById('refNo').value,
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      vin: vin,
+      batch: document.getElementById('batchNo').value.trim() || "-",
+      inspector: document.getElementById('inspector').value || "Inspector",
+      status: currentStatus,
+      ngDetail: currentStatus === 'NG' ? document.getElementById('ngDetail').value : "-",
+      photos: base64Photos,
+      notes: ""
+    };
+
+    alert("Mengirim data & mengunggah foto ke Drive...");
+
+    fetch(window.location.href, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "SUCCESS") {
+        alert("Data NCP BIP Berhasil Disimpan!");
+        location.reload();
+      } else {
+        alert("Terjadi kesalahan: " + data.message);
+      }
+    })
+    .catch(err => alert("Gagal koneksi: " + err));
+  }
+</script>
+</body>
+</html>
